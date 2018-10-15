@@ -1,0 +1,37 @@
+---
+title: "Test"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE}
+library(RCurl)
+library(dplyr)
+library(tidyr)
+library(rvest)
+library(stringr)
+```
+
+
+```{r}
+#Get list of all csv files
+csvFiles<-read_html("https://open-skills-datasets.s3-us-west-2.amazonaws.com/") %>% html_nodes("key") %>% html_text() %>% str_extract("cleaned_title_count/[:print:]+") %>% str_extract("[0-9]+Q[1-4].csv")
+csvFiles<-csvFiles[!is.na(csvFiles)] 
+csvFiles
+```
+
+
+
+```{r}
+#read last available csv file
+url<-paste("https://open-skills-datasets.s3-us-west-2.amazonaws.com/cleaned_title_count/",tail(csvFiles,n=1),sep="")
+x<-getURL(url)
+out1<-read.csv(textConnection(x))
+url<-paste("https://open-skills-datasets.s3-us-west-2.amazonaws.com/cleaned_title_count/",csvFiles[length(csvFiles)-1],sep="")
+x<-getURL(url)
+out2<-read.csv(textConnection(x))
+out<-rbind(out1,out2)
+```
+
